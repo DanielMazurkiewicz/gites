@@ -7,8 +7,8 @@ program
     .option('-n, --new [task_title]', 'Starts a new task')
     .option('-s, --save [comment]', 'Saves current work')
     .option('-w, --switch [task_title]', 'Switches to existing task')
-    .option('-c, --config [config_name]', 'Switches configuration files (unsupported yet)')
     .option('-p, --superpower', 'Allows to save directly to develop or master branch')
+    .option('-c, --config [config_name]', 'Switches configuration files (unsupported yet)')
     .parse(process.argv);
 
 
