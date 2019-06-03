@@ -1,6 +1,16 @@
 # gites
 
-Command line tool that simplifies workflow with git and packages and configuration files dongling
+Command line tool that simplifies workflow with git. Also helps with dongling packages and configuration files.
+
+# Installation
+
+```
+npm install -g gites
+
+or
+
+sudo npm install -g gites
+```
 
 # How to use:
 
@@ -17,4 +27,20 @@ Options:
   -c, --config [config_name]  Switches configuration files (unsupported yet)
   -h, --help                  output usage information
 
+```
+
+# Usage examples:
+
+```
+gites --new some_new_task_name
+gites --save "comment about what you save or what is a purpouse of it"
+gites --switch some_existing_task_name
+```
+
+# Additional info
+
+Task name "here" is reserved and can be used to inform that new task should be based on current content of local files
+
+```
+gites --new some_bugfix_task --from here
 ```

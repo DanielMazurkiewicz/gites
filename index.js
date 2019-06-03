@@ -114,8 +114,10 @@ if (program.new) {
         if (program.new === true) {
             console.log('Missing task title');
         } else {
-            simpleGit.checkout(program.from || defaultSourceBranch);
-            simpleGit.pull();
+            if (program.from !== 'here') {
+                simpleGit.checkout(program.from || defaultSourceBranch);
+                simpleGit.pull();    
+            }
 
             simpleGit.checkout(program.new);
         }
@@ -124,5 +126,5 @@ if (program.new) {
 
 
 if (program.config) {
-
+    // TODO: support for config
 }
