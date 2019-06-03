@@ -15,8 +15,16 @@ program
     .parse(process.argv);
 
 
-
 const isAwaitingToSave = status => status.not_added.length || status.created.length || status.deleted.length || status.modified.length || status.renamed.length;
+const getTaskName = taskName => taskName
+    .replace(/\*/g, '_')
+    .replace(/\?/g, '%')
+    .replace(/\^/g, '&')
+    .replace(/\~/g, '_')
+    .replace(/\:/g, '#')
+    .replace(/\\/g, '|')
+    .replace(/\s/g, ` `); // magic ;-)
+
 
 simpleGit.fetch()
 .then(() => simpleGit.status())
@@ -59,18 +67,18 @@ simpleGit.fetch()
         }
 
         return simpleGit.branch().then(info => {
+            if (program.switch === true) {
+                throw new Error('Missing task title');
+            }
+
+            program.switch = getTaskName(program.switch);
             if (!info.branches[program.switch]) {
                 throw new Error('Task doesn\'t exist')
             }
-            
-    
-            if (program.switch === true) {
-                throw new Error('Missing task title');
-            } else {
-                return simpleGit.checkout(program.switch).then(() =>
-                    simpleGit.pull()
-                );
-            }    
+
+            return simpleGit.checkout(program.switch).then(() =>
+                simpleGit.pull()
+            );
         })
     }
     
@@ -86,33 +94,37 @@ simpleGit.fetch()
 
         return simpleGit.branch().then(info => {
 
-            if (info.branches[program.new]) {
-                throw new Error('Task already exist, use --switch option if you want to switch to that task')
-            }
-            
-            const defaultSourceBranch = info.branches.develop ? 'develop' : info.branches.master ? 'master' : false;
-
-            if (!defaultSourceBranch && !program.from) {
-                throw new Error('Missing branch master and/or develop');
+            if (program.new === true) {
+                throw new Error('Missing task title');
             }
 
             if (program.from === true) {
                 throw new Error('Missing task title of base code');
             }
 
-            if (program.new === true) {
-                throw new Error('Missing task title');
-            } else {
-                if (program.from !== 'here') {
-                    return simpleGit.checkout(program.from || defaultSourceBranch).then(() =>
-                        simpleGit.pull()
-                    ).then(() => 
-                        simpleGit.checkout('-b', program.new)
-                    );
-                }
-
-                return simpleGit.checkout('-b', program.new);
+            program.new = getTaskName(program.new);
+            if (info.branches[program.new]) {
+                throw new Error('Task already exist, use --switch option if you want to switch to that task')
             }
+            
+
+            const defaultSourceBranch = info.branches.develop ? 'develop' : info.branches.master ? 'master' : false;
+
+            if (!defaultSourceBranch && !program.from) {
+                throw new Error('Missing branch master and/or develop');
+            }
+
+
+            program.from = getTaskName(program.from);
+            if (program.from !== 'here') {
+                return simpleGit.checkout(program.from || defaultSourceBranch).then(() =>
+                    simpleGit.pull()
+                ).then(() => 
+                    simpleGit.checkout(['-b', program.new])
+                );
+            }
+
+            return simpleGit.checkout(['-b', program.new]);
         });
     }
     
