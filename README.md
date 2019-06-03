@@ -32,9 +32,9 @@ Options:
 # Usage examples:
 
 ```
-gites --new some_new_task_name
+gites --new "some new task name"
 gites --save "comment about what you save or what is a purpouse of it"
-gites --switch some_existing_task_name
+gites --switch "some existing task name"
 ```
 
 # Additional info
@@ -42,5 +42,5 @@ gites --switch some_existing_task_name
 Task name "here" is reserved and can be used to inform that new task should be based on current content of local files
 
 ```
-gites --new some_bugfix_task --from here
+gites --new "some bugfix task" --from here
 ```
