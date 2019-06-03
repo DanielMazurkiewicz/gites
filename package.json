@@ -1,6 +1,6 @@
 {
   "name": "gites",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "preferGlobal": true,
   "bin": {
     "gites": "index.js"
