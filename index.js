@@ -16,7 +16,7 @@ program
 
 
 const isAwaitingToSave = status => status.not_added.length || status.created.length || status.deleted.length || status.modified.length || status.renamed.length;
-const getTaskName = taskName => taskName
+const getTaskName = taskName => !taskName ? taskName : taskName
     .replace(/\*/g, '_')
     .replace(/\?/g, '%')
     .replace(/\^/g, '&')
