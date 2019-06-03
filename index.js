@@ -2,7 +2,7 @@
 
 const program = require('commander');
 const package = require('./package');
-const simpleGit = require('simple-git')();
+const simpleGit = require('simple-git/promise')();
  
 program
     .version(package.version)
@@ -18,113 +18,116 @@ program
 
 const isAwaitingToSave = status => status.not_added.length || status.created.length || status.deleted.length || status.modified.length || status.renamed.length;
 
-simpleGit.fetch();
+simpleGit.fetch()
+.then(() => simpleGit.status())
+.then(status => {
 
-
-if (program.save) {
-    simpleGit.status((error, status) => {
+    if (program.save) {
         if (status.conflicted.length) {
-            console.log('Can not save due to existing conflicts: ' + status.conflicted.join(', '))
-            return;
+            throw new Error('Can not save due to existing conflicts: ' + status.conflicted.join(', '))
         }
 
         if (status.current === 'master' || status.current === 'develop') {
             if (!program.superpower) {
-                console.log('Saving to master or develop branch requires -p or --superpower argument')
-                return;
+                throw new Error('Saving to master or develop branch requires -p or --superpower argument')
             }
         }
 
         if (isAwaitingToSave(status)) {
             if (program.save === true) {
-                console.log('Missing save comment');
+                throw new Error('Missing save comment');
             } else {
-                simpleGit.add('.');
-                simpleGit.commit(program.save);
-                simpleGit.push();
+                return simpleGit.add('.').then(() => 
+                    simpleGit.commit(program.save)
+                ).then(() =>
+                    simpleGit.push()
+                )
             }
         } else {
-            console.log('Nothing to save');
+            throw new Error('Nothing to save');
         }
-    });
-}
-
-
-if (program.switch) {
-    simpleGit.status((error, status) => {
+    }
+    
+    
+    if (program.switch) {
         if (status.conflicted.length) {
-            console.log('Can not switch to other task due to existing conflicts: ' + status.conflicted.join(', '))
-            return;
+            throw new Error('Can not switch to other task due to existing conflicts: ' + status.conflicted.join(', '))
         }
 
         if (isAwaitingToSave(status)) {
-            console.log('Can not switch to other task due to unsaved work - save it first and then switch')
-            return;
+            throw new Error('Can not switch to other task due to unsaved work - save it first and then switch')
         }
 
-        let info;
-        simpleGit.branch((error, i) => info = i);
-        if (!info.branches[program.switch]) {
-            console.log('Task doesn\'t exist')
-            return;
-        }
-        
-
-        if (program.switch === true) {
-            console.log('Missing task title');
-        } else {
-            simpleGit.checkout(program.switch);
-            simpleGit.pull();
-        }
-    });
-}
-
-
-if (program.new) {
-    simpleGit.status((error, status) => {
+        return simpleGit.branch().then(info => {
+            if (!info.branches[program.switch]) {
+                throw new Error('Task doesn\'t exist')
+            }
+            
+    
+            if (program.switch === true) {
+                throw new Error('Missing task title');
+            } else {
+                return simpleGit.checkout(program.switch).then(() =>
+                    simpleGit.pull()
+                );
+            }    
+        })
+    }
+    
+    
+    if (program.new) {
         if (status.conflicted.length) {
-            console.log('Can not create new task due to existing conflicts: ' + status.conflicted.join(', '))
-            return;
+            throw new Error('Can not create new task due to existing conflicts: ' + status.conflicted.join(', '))
         }
 
         if (isAwaitingToSave(status)) {
-            console.log('Can not create new task due to unsaved work - save it first')
-            return;
+            throw new Error('Can not create new task due to unsaved work - save it first')
         }
 
-        let info;
-        simpleGit.branch((error, i) => info = i);
-        if (info.branches[program.new]) {
-            console.log('Task already exist, use --switch option if you want to switch to that task')
-            return;
-        }
-        
-        const defaultSourceBranch = info.branches.develop ? 'develop' : info.branches.master ? 'master' : false;
+        return simpleGit.branch().then(info => {
 
-        if (!defaultSourceBranch && !program.from) {
-            console.log('Missing branch master and/or develop');
-            return;
-        }
+            if (info.branches[program.new]) {
+                throw new Error('Task already exist, use --switch option if you want to switch to that task')
+            }
+            
+            const defaultSourceBranch = info.branches.develop ? 'develop' : info.branches.master ? 'master' : false;
 
-        if (program.from === true) {
-            console.log('Missing task title of base code');
-            return;
-        }
-
-        if (program.new === true) {
-            console.log('Missing task title');
-        } else {
-            if (program.from !== 'here') {
-                simpleGit.checkout(program.from || defaultSourceBranch);
-                simpleGit.pull();    
+            if (!defaultSourceBranch && !program.from) {
+                throw new Error('Missing branch master and/or develop');
             }
 
-            simpleGit.checkout(program.new);
-        }
-    });
-}
+            if (program.from === true) {
+                throw new Error('Missing task title of base code');
+            }
+
+            if (program.new === true) {
+                throw new Error('Missing task title');
+            } else {
+                if (program.from !== 'here') {
+                    return simpleGit.checkout(program.from || defaultSourceBranch).then(() =>
+                        simpleGit.pull()
+                    ).then(() => 
+                        simpleGit.checkout(program.new)
+                    );
+                }
+
+                return simpleGit.checkout(program.new);
+            }
+        });
+    }
+    
+    
+    if (program.config) {
+        // TODO: support for config
+    }
+
+    throw new Error('Invalid commandline options or lack of them')
+})
+.then(() => {
+    console.log('DONE')
+})
+.catch( error => {
+    console.log(error.message);
+})
 
 
-if (program.config) {
-    // TODO: support for config
-}
