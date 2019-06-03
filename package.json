@@ -1,0 +1,29 @@
+{
+  "name": "gites",
+  "version": "0.0.1",
+  "preferGlobal": true,
+  "bin": {
+    "gites": "index.js"
+  },
+  "description": "Simplified usage of git",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanielMazurkiewicz/gites.git"
+  },
+  "keywords": [
+    "git",
+    "simple"
+  ],
+  "author": "Daniel Mazurkiewicz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DanielMazurkiewicz/gites/issues"
+  },
+  "homepage": "https://github.com/DanielMazurkiewicz/gites#readme",
+  "dependencies": {
+    "commander": "^2.20.0",
+    "simple-git": "^1.113.0"
+  }
+}
