@@ -23,6 +23,7 @@ const getTaskName = taskName => !taskName ? taskName : taskName
     .replace(/\~/g, '_')
     .replace(/\:/g, '#')
     .replace(/\\/g, '|')
+    .replace(/\//g, '|')
     .replace(/\s/g, '_');
 
 
