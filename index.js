@@ -13,13 +13,14 @@ program
 
 
 
-const isSaved = status => status.not_added.length || status.created.length || status.deleted.length || status.modified.length || status.renamed.length;
+const isAwaitingToSave = status => status.not_added.length || status.created.length || status.deleted.length || status.modified.length || status.renamed.length;
 
-simpleGit.fetch();
+simpleGit.fetch((error, info) => console.log(info));
+
+
 
 if (program.save) {
     simpleGit.status((error, status) => {
-        console.log(status)
         if (status.conflicted.length) {
             console.log('Can not save due to existing conflicts: ' + status.conflicted.join(', '))
             return;
@@ -32,7 +33,7 @@ if (program.save) {
             }
         }
 
-        if (isSaved(status)) {
+        if (isAwaitingToSave(status)) {
             if (program.save === true) {
                 console.log('Missing save comment');
             } else {
@@ -46,7 +47,29 @@ if (program.save) {
     });
 }
 
+
 if (program.switch) {
+    simpleGit.status((error, status) => {
+        if (status.conflicted.length) {
+            console.log('Can not switch to other task due to existing conflicts: ' + status.conflicted.join(', '))
+            return;
+        }
+
+        if (isAwaitingToSave(status)) {
+            console.log('Can not switch to other task due to unsaved work -save it first and then switch')
+            return;
+        }
+
+
+        if (program.switch === true) {
+            console.log('Missing task title');
+        } else {
+            simpleGit.add('.');
+            simpleGit.commit(program.save);
+            simpleGit.push();
+        }
+
+    });
 
 }
 
