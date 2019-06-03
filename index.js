@@ -67,7 +67,7 @@ simpleGit.fetch()
             if (program.switch === true) {
                 throw new Error('Missing task title');
             } else {
-                return simpleGit.checkout(program.switch).then(() =>
+                return simpleGit.checkoutBranch(program.switch).then(() =>
                     simpleGit.pull()
                 );
             }    
@@ -104,14 +104,14 @@ simpleGit.fetch()
                 throw new Error('Missing task title');
             } else {
                 if (program.from !== 'here') {
-                    return simpleGit.checkout(program.from || defaultSourceBranch).then(() =>
+                    return simpleGit.checkoutBranch(program.from || defaultSourceBranch).then(() =>
                         simpleGit.pull()
                     ).then(() => 
-                        simpleGit.checkout(program.new)
+                        simpleGit.checkoutBranch(program.new)
                     );
                 }
 
-                return simpleGit.checkout(program.new);
+                return simpleGit.checkoutBranch(program.new);
             }
         });
     }
