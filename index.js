@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const program = require('commander');
 const package = require('./package');
 const simpleGit = require('simple-git')();
